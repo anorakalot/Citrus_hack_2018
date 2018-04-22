@@ -1,4 +1,5 @@
 #include "Timer.h"
+#include <NewPing.h>
  
  
 Timer t;
@@ -15,6 +16,16 @@ long duration_right;
 long distance_right; // ACTUAL DISTANCE
 
 
+
+//int MAX_DISTANCE = 200
+ 
+//NewPing sonar_left(trig_left, echo_left, MAX_DISTANCE);
+
+//NewPing sonar_middle(trig_middle, echo_middle, MAX_DISTANCE);
+
+//NewPing sonar_right(trig_right, echo_right, MAX_DISTANCE);
+ 
+ 
 
 //MAKE SURE I FILL IN CORRECT PIN VALUES LATER
 int trig_left = 22;
@@ -67,7 +78,7 @@ enum sonic_states { INIT_1, ON_1, OFF_1} sonic_states;
 
 enum photo_res_states { INIT_2, ON_2, OFF_2} photo_res_states;
 
-enum motor_states { INIT_MOTOR,FORWARD,LEFT_TURN} motor_states;
+enum motor_states { INIT_MOTOR,FORWARD,LEFT_TURN,RIGHT_TURN} motor_states;
 
  
 void setup()
@@ -77,10 +88,14 @@ void setup()
   //blink_Init();
   //t.every(1000, blink_Tick);
 
+  //init functions for state machines
   sonic_init();
+  photo_init();
+  motor_init();
+  
   t.every(10,sonic_tick);
   t.every(10,photo_tick); 
-
+  
 }
  
  
@@ -154,7 +169,7 @@ void sonic_tick(){
     pinMode(echo_right,INPUT);
     break;
    case ON_1:
-    
+      
     digitalWrite(trig_left,LOW);
     delay(10);
     digitalWrite(trig_left,HIGH);
@@ -181,7 +196,14 @@ void sonic_tick(){
     duration_right = pulseIn(echo_right,HIGH);
     distance_right = (duration_right/2) / 29.1;
     Serial.println(distance_right);
-  
+    
+  /*
+    distance_left = sonar_left.ping_cm();
+    distance_middle = sonar_middle.ping_cm();
+    distance_right = sonar_right.ping_cm();
+   */
+
+    
     break;
    case OFF_1:
     break;
@@ -244,8 +266,18 @@ void movement_tick() {
       digitalWrite(motor_2_logic_1,LOW);
       break;
     case LEFT_TURN:
+      
+//      while(yawangle - yaweangle
+      
       break;
-  }
+    case RIGHT_TURN:
+  //    double curr= yawangle;
+  //    while(yawangle - curr < 90){
+  
+      break;
+      
+   }
+  
 
   
 }
