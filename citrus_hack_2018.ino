@@ -117,7 +117,7 @@ int right_speed = 150;
 
 float curr_left;
 float curr_right;
-
+float curr_rever;
 
 //TIME FOR HALT MOVEMENT GLOBAL VARIABLES 
 //time_t time_1;
@@ -134,7 +134,7 @@ enum sonic_states { INIT_SONIC, ON_1, OFF_1} sonic_states;
 
 enum photo_res_states { INIT_PHOTO, ON_2, OFF_2} photo_res_states;
 
-enum motor_states { INIT_MOTOR , FORWARD, LEFT_TURN , RIGHT_TURN,HALT} motor_states;
+enum motor_states { INIT_MOTOR , FORWARD, LEFT_TURN , RIGHT_TURN,REVERSE_TURN,HALT} motor_states;
 
  
 void setup()
@@ -474,6 +474,17 @@ void movement_tick() {
         right_turn();
       }
       break;
+
+//pretty sure this is right 
+//cant be sure until testing
+    case REVERSE_TURN:
+      curr_rever = yawangle;
+      //just does left turn until its reversed      
+      while(curr_rever-yawangle < 180){
+        left_turn();
+      }
+      
+      break;
       
    
 
@@ -523,7 +534,7 @@ void movement_tick() {
         }
 
                     // GREEN                                           //RED
-        else if (left_photo_value > 750 && right_photo_value > 750 && front_photo_value > 1020){ // && back_photo_value > 570
+        else if (left_photo_value > 750 && right_photo_value > 750 && front_photo_value > 460 && back_photo_value > 570) {
           motor_states = HALT;
         }
         
@@ -537,6 +548,7 @@ void movement_tick() {
           motor_states = FORWARD;
         }
       */
+      //use below to test motors and such
       motor_states = FORWARD;  
         break;
 
