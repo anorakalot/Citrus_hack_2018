@@ -71,8 +71,8 @@ int motor_2_logic_2 = 21;
 int turn_on_en_1 = 5;
 int turn_on_en_2 = 6;
 
-int left_speed = 150;
-int right_speed = 150;
+int left_speed = 250;
+int right_speed = 250;
 
 float curr_left;
 float curr_right;
@@ -93,7 +93,7 @@ enum sonic_states { INIT_SONIC, ON_1, OFF_1} sonic_states;
 
 enum photo_res_states { INIT_PHOTO, ON_2, OFF_2} photo_res_states;
 
-enum motor_states { INIT_MOTOR , FORWARD, LEFT_TURN , RIGHT_TURN,REVERSE_TURN,HALT} motor_states;
+enum motor_states { INIT_MOTOR , FORWARD, HALT,REVERSE} motor_states;
 
  
 void setup()
@@ -106,6 +106,7 @@ void setup()
 
 //USE 
   //init functions for state machines
+  
   sonic_init();
   photo_init();
   motor_init();
@@ -113,7 +114,7 @@ void setup()
 
   t.every(1000,sonic_tick);
   t.every(1000,photo_tick); 
-  t.every(10,movement_tick);
+  t.every(8,movement_tick);
 
 
 
@@ -150,8 +151,8 @@ void photo_tick() {
 
      //NEED TO MAP FRONT AND BACK 
      //ASSUMING FRONT IS RED AND BACK IS BLUE
-     front_photo_value = map(front_photo_value, 700,1023,0,500);// 730
-     back_photo_value = map(back_photo_value,110,550,0,500);
+     front_photo_value = map(front_photo_value, 454,1023,0,500);// 730
+     back_photo_value = map(back_photo_value,77,600,0,500);
 
      Serial.print( "LEFT PHOTO ");
      Serial.println(left_photo_value);
@@ -302,60 +303,47 @@ void movement_tick() {
   //actions
   switch(motor_states){
     case INIT_MOTOR:
-    
-    pinMode(turn_on_en_1,OUTPUT);
-    pinMode(turn_on_en_2,OUTPUT);
-      
-    pinMode(motor_1_logic_1,OUTPUT);
-      
-    pinMode(motor_1_logic_2,OUTPUT);
-      
-    pinMode(motor_2_logic_1,OUTPUT);
-      
-    pinMode(motor_2_logic_2,OUTPUT);
-      
-    digitalWrite(turn_on_en_1,LOW);
-    digitalWrite(turn_on_en_2,LOW);
 
-    break;
+        
+        Serial.println("INIT MOTOR state function");
+        pinMode(turn_on_en_1,OUTPUT);
+        pinMode(turn_on_en_2,OUTPUT);
+          
+        pinMode(motor_1_logic_1,OUTPUT);
+          
+        pinMode(motor_1_logic_2,OUTPUT);
+          
+        pinMode(motor_2_logic_1,OUTPUT);
+          
+        pinMode(motor_2_logic_2,OUTPUT);
+          
+        digitalWrite(turn_on_en_1,LOW);
+        digitalWrite(turn_on_en_2,LOW);
+      
+        break;
     case FORWARD:
 
-  
+     Serial.println("FORWARD state function");
      digitalWrite(turn_on_en_1,HIGH);
      digitalWrite(turn_on_en_2,HIGH);
-  
-     analogWrite(motor_1_logic_2,left_speed);
+
      digitalWrite(motor_1_logic_1,LOW);
-     analogWrite(motor_2_logic_2,right_speed);
+     analogWrite(motor_1_logic_2,left_speed);
+     
      digitalWrite(motor_2_logic_1,LOW);
-   
-      
-        
-              
-      break;
-   case LEFT_TURN:
-      left_turn();
-      break;
-
-   case RIGHT_TURN:
-     right_turn();
-      break;
-
-   case REVERSE_TURN:
-      reverse_turn();
-      
-      break;
-      
-   
-
+     analogWrite(motor_2_logic_2,right_speed);
+     break;
+ 
 
    case HALT:
-      time_1 = millis();
+      Serial.println("Halt state function ");
+/*      time_1 = millis();
 
       time_2 = 1;
 
       while(time_2 - time_1 < 20000){
       time_2 = millis();
+      */
       digitalWrite(turn_on_en_1,LOW);
       digitalWrite(turn_on_en_2,LOW);
 
@@ -363,8 +351,22 @@ void movement_tick() {
       digitalWrite(motor_1_logic_2,LOW);
       digitalWrite(motor_2_logic_1,LOW);
       digitalWrite(motor_2_logic_2,LOW);
-      }
+      //}
+      delay(5000);
       break;      
+
+
+  case REVERSE:
+    digitalWrite(turn_on_en_1,HIGH);
+    digitalWrite(turn_on_en_2,HIGH);
+    
+    digitalWrite(motor_1_logic_1,HIGH);
+    digitalWrite(motor_1_logic_2,LOW);
+    
+    digitalWrite(motor_2_logic_1,HIGH);
+    digitalWrite(motor_2_logic_2,LOW);
+  
+
 
   } 
   
@@ -374,62 +376,50 @@ void movement_tick() {
     switch(motor_states){
      case INIT_MOTOR:
         motor_states = FORWARD;    
+        //motor_states = LEFT_TURN;
         break;
      case FORWARD:
-     
-    
-        //IF ABOUT TO HIT A FRONT WALL
-        //ASSUMING THAT ITS NOT SURROUNDED ON BOTH SIDES 
-        /*
-        if (distance_middle < 10){
-          if (distance_left < 10){
-            motor_states = RIGHT_TURN;
-          }
-          else if (distance_right< 10){
-            motor_states = LEFT_TURN;
-          }
-          //if neither just do a right turn
-          else{
-            motor_states = RIGHT_TURN;
-          }
-        }
-        */
-                    // GREEN                                           //RED
-        if (left_photo_value > 750 && right_photo_value > 750 && front_photo_value > 460 && back_photo_value > 570) {
+        
+      if (left_photo_value > 700 && right_photo_value > 700 && front_photo_value > 450 && back_photo_value > 450) {
           motor_states = HALT;
         }
-        
-        else if ((left_photo_value- right_photo_value) >20 ){
-          motor_states = LEFT_TURN;  
+       
+        else if ((back_photo_value - front_photo_value) > 100){
+          motor_states = REVERSE;
         }
-
-        
-        
-        else if ((right_photo_value-left_photo_value) >20 ){
-          motor_states = RIGHT_TURN;
-        }
-
-        else if ((back_photo_value - front_photo_value) > 20){
-          motor_states = REVERSE_TURN;
-        }
-        else{
+        else if ((front_photo_value - back_photo_value) > 100){
           motor_states = FORWARD;
         }
       
-      /*
-      //use below to test motors and such
-      motor_states = FORWARD;  
         break;
-      */
-     case LEFT_TURN:
-        motor_states = FORWARD;
-        break;
-     case RIGHT_TURN:
-        motor_states = FORWARD;
+       
+     case REVERSE:
+     if (left_photo_value > 700 && right_photo_value > 700 && front_photo_value > 450 && back_photo_value > 450) {
+          motor_states = HALT;
+        }
+        
+        else if ((back_photo_value - front_photo_value) > 100){
+          motor_states = REVERSE;
+        }
+        else if ((front_photo_value - back_photo_value) > 100){
+          motor_states = FORWARD;
+        }
         break;
      case HALT:
-        motor_states = FORWARD;
+        //motor_states = FORWARD;
+        //motor_states = LEFT_TURN;
+        if (left_photo_value > 700 && right_photo_value > 700 && front_photo_value > 450 && back_photo_value > 450) {
+          motor_states = HALT;
+        }
+        
+        else if ((back_photo_value - front_photo_value) > 100){
+          motor_states = REVERSE;
+        }
+        else if ((front_photo_value - back_photo_value) > 100){
+          motor_states = FORWARD;
+        }
         break;
+       
      
      default:
         break;
@@ -444,10 +434,10 @@ void left_turn(){
   digitalWrite(turn_on_en_2,HIGH);
 
   
-  digitalWrite(motor_1_logic_1,100);
+  digitalWrite(motor_1_logic_1,HIGH);
   digitalWrite(motor_1_logic_2,LOW);
   digitalWrite(motor_2_logic_1,LOW);
-  digitalWrite(motor_2_logic_2,100);
+  digitalWrite(motor_2_logic_2,HIGH);
   delay(420);
 }
 
@@ -458,8 +448,8 @@ void right_turn(){
 
   
   digitalWrite(motor_1_logic_1,LOW);
-  analogWrite(motor_1_logic_2,100);
-  analogWrite(motor_2_logic_1,100);
+  analogWrite(motor_1_logic_2,HIGH);
+  analogWrite(motor_2_logic_1,HIGH);
   digitalWrite(motor_2_logic_2,LOW);
   delay(420);
 }
@@ -470,10 +460,10 @@ void reverse_turn(){
   digitalWrite(turn_on_en_2,HIGH);
 
   
-  digitalWrite(motor_1_logic_1,100);
+  digitalWrite(motor_1_logic_1,HIGH);
   digitalWrite(motor_1_logic_2,LOW);
   digitalWrite(motor_2_logic_1,LOW);
-  digitalWrite(motor_2_logic_2,100);
+  digitalWrite(motor_2_logic_2,HIGH);
   delay(840);
 }
 
