@@ -459,7 +459,7 @@ void movement_tick() {
 
       
       break;
-      
+    //check logic for turns
     case LEFT_TURN:
      curr_left = yawangle; 
       while(curr_left - yawangle < 90){
@@ -467,7 +467,7 @@ void movement_tick() {
       }
       
       break;
-  
+  //check logic for turns 
    case RIGHT_TURN:
       curr_right = yawangle;
       while(yawangle - curr_right < 90){
@@ -489,7 +489,7 @@ void movement_tick() {
    
 
 
-
+   //test this as well
    case HALT:
       time_1 = millis();
 
