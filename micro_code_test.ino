@@ -133,17 +133,17 @@ void setup() {
   if (sensorReading_middle > 300){
     first_check = false;
     //delay(300);
-    /*
+    ////*
     unsigned long curr = millis();
     while (millis() - curr < 500){
     //nothing (just waiting for 500 seconds to pass
     }
    }
-   */
-   delay(300);
-    }
-
+   //*/
+   //delay(300);
   }
+
+  //}
 }
 
 //encoder and turns
@@ -176,7 +176,7 @@ void left_turn_until(){
 //use left_count
 void right_turn_until(){
   unsigned long curr = left_count;
-  while( left_count - curr < 290){ //320,340, 370,300
+  while( left_count - curr < 260){ //320,340, 370,300,290,280,270
     right_turn();
   }
 }
@@ -189,14 +189,14 @@ void reverse_turn_until(){
   unsigned long curr_r = left_count;
   
  if (sensorReading_left < sensorReading_right){
-  while( left_count - curr_l <830 ){ //, 860,870
+  while( left_count - curr_l < 790){ //800,830, 860,870
     left_turn();
  }
  
 }
 
   else{//use left_count instead of right_count
-    while( left_count - curr_r < 830){ // 860,870
+    while( left_count - curr_r < 790){ //800,830, 860,870
       right_turn();
     }
        
@@ -206,7 +206,7 @@ void reverse_turn_until(){
 
 void go_one_cell(){
   unsigned long curr = left_count;
-  while(left_count-curr < 950){ // 450,600, 800
+  while(left_count-curr < 950){ // 450,600, 800,950,900
     pid_control();
     //forward(150,150);
   }
@@ -248,7 +248,7 @@ permReading_right= 0;
 
 //CHOICES
 bool hasfrontwall(){
-  if (sensorReading_middle >275){ //300 , 350,370,400
+  if (sensorReading_middle >330){ //300 , 350,370,400,275
     return true;
   }
   return false;
@@ -282,7 +282,7 @@ void random_move(){
       return;
     }
     //this isnt running 
-    else if (hasrightwall()  && hasfrontwall()){//&& !hasleftwall()
+    else if (hasrightwall()  && hasfrontwall()&& !hasleftwall()){//
       left_turn_until();
       return;
     }
@@ -350,9 +350,9 @@ void loop(){
 
 
 //forward(100,100);
-  pid_control();
-  //go_one_cell();
-  //halt_until(1000);
+  //pid_control();
+  go_one_cell();
+  halt_until(700);
   //go one cell now uses pid control too   
 
 //  readIR();
@@ -368,12 +368,13 @@ void loop(){
 
   
   if (hasfrontwall()){
-   halt_until(2000);
+   halt_until(1000);
    //right_turn_until();
    //left_turn_until();
-   reverse_turn_until();
-   halt_until(2000);
-   //random_move();  
+   random_move(); 
+   //reverse_turn_until();
+   halt_until(1000);
+    
   }
   //*/
  
